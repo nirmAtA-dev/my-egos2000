@@ -1,6 +1,6 @@
 # Learning OS internals from ***EGOS-2000***
 
-##***BASIC-SETUP***
+## ***BASIC-SETUP***
 - If you are in linux and shell is bash, then write a line at the end where you add below command
 > export EGOS=/home/yourusername/path/to/egos
 - This will help you to navigate egos folder using
