@@ -1,3 +1,7 @@
 hello.elf
 hello.bin
 hello.lst
+hello_s.o 
+hello.o 
+hello_o.lst 
+hello_s.lst

@@ -18,7 +18,7 @@ SECTIONS
     } >ram :ram
 
     .text : ALIGN(8) {
-        *(.text .text.*)
+        *(.text.*)
     } >ram :ram
 
     .rodata : ALIGN(8) {
