@@ -21,9 +21,7 @@ qemu: all
 	$(QEMU) -nographic -machine virt -smp 1 -m 4M -bios hello.bin
 
 clean:
-	rm -f hello.bin hello.lst hello.elf
-	rm -f thread.bin thread.lst thread.elf
-	rm -rf build tools/egos.bin tools/mkfs tools/disk.img tools/fpgaROM.bin tools/qemuROM.bin
+	@rm -f hello.bin hello.lst hello.elf
 
 GREEN = \033[1;32m
 YELLOW = \033[1;33m
