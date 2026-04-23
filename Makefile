@@ -8,12 +8,14 @@ OBJCOPY     = riscv-none-elf-objcopy
 
 LDFLAGS     = -nostdlib -lc -lgcc
 CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin
+AFLAGS	    = -S -O0 -march=rv32i -mabi=ilp32 -fno-asynchronous-unwind-tables -fno-exceptions
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
 all:
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
 	$(RISCV_CC) $(CFLAGS) -c hello.s -o hello_s.o
 	$(RISCV_CC) $(CFLAGS) -c hello.c -o hello.o
+	$(RISCV_CC) $(AFLAGS) hello.c -o hello_main.s
 	$(RISCV_CC) $(CFLAGS) hello.s hello.c -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.o > hello_o.lst
@@ -25,7 +27,7 @@ qemu: all
 	$(QEMU) -nographic -machine virt -smp 1 -m 4M -bios hello.bin
 
 clean:
-	@rm -f hello.bin hello.lst hello.elf hello_s.o hello.o hello_o.lst hello_s.lst
+	@rm -f hello.bin hello.lst hello.elf hello_s.o hello.o hello_o.lst hello_s.lst hello_main.s
 
 GREEN = \033[1;32m
 YELLOW = \033[1;33m

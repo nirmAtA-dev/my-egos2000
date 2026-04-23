@@ -5,3 +5,4 @@ hello_s.o
 hello.o 
 hello_o.lst 
 hello_s.lst
+hello_main.s
