@@ -7,7 +7,6 @@ void terminal_write(const char *str, int len) {
 /* Uncomment line11 - line39
  * when implementing formatted output
  */
-/*
 #include <stdlib.h>  // for itoa() and utoa()
 #include <string.h>  // for strlen() and strcat()
 #include <stdarg.h>  // for va_start(), va_end(), va_arg() and va_copy()
@@ -21,14 +20,21 @@ void format_to_str(char* out, const char* fmt, va_list args) {
             if (*fmt == 's') {
                 strcat(out, va_arg(args, char*));
             } else if (*fmt == 'd') {
-                itoa(va_arg(args, int), out + strlen(out), 10);
-            }
+                itoa(va_arg(args, int), out + strlen(out), 10);	/* structure of itoa is (integer, char * buffer, radix) */
+            } else if (*fmt == 'c') {
+		char arr[2];
+		arr[0] = va_arg(args, int);
+		arr[1] = '\0';
+		strcat(out, arr);
+	    }
         }
     }
 }
 
 int printf(const char* format, ...) {
     char buf[512];
+    /* Here the va_list is a pointer that points to all arguments this is effectlively stored
+     * in stack and exchanged with other function through stack */
     va_list args;
     va_start(args, format);
     format_to_str(buf, format, args);
@@ -37,7 +43,6 @@ int printf(const char* format, ...) {
 
     return 0;
 }
-*/
 
 /* Uncomment line46 - line57
  * when implementing dynamic memory allocation
@@ -64,7 +69,14 @@ int main() {
     /* Uncomment this line of code
      * when implementing formatted output
      */
-    /* printf("%s-%d is awesome!\n\r", "egos", 2000); */
-
+    printf("%s-%d is awesome!\n\r", "egos", 2000);
+    printf("%c is character $\n\r", '$');
+    printf("%c is character 0", (char)48);
+    /*
+    printf("%x is integer 1234 in hexadecimal", 1234);
+    printf("%u is the maximum of unsigned int", (unsigned int)0xFFFFFFFF);
+    printf("%p is the hexadecimal address of the hello-world string", msg);
+    printf("%llu is the maximum of unsigned long long", 0xFFFFFFFFFFFFFFFFULL);
+    */
     return 0;
 }
