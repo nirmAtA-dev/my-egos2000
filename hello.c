@@ -279,7 +279,7 @@ size_t format_to_str_len(const char *fmt, va_list args){
 	// I just want a simple code not exact , hence 20 bytes 
 	// extra are nothing in case of integer
 	unsigned int count = 0;
-	while(*fmt != '%'){
+	while(*fmt != '%' && *fmt != '\0'){
 		fmt++;
 		count++;
 	}
@@ -322,6 +322,9 @@ int main() {
     /* Uncomment this line of code
      * when implementing formatted output
      */
+    printf("This is a test\n\r\0");
+    printf("This is a new test\n\r\0");
+    printf("This is again a new test \n\r\0");
     printf("%s-%d is awesome!\n\r", "egos", 2000);
     printf("%c is character $\n\r", '$');
     printf("%c is character 0\n\r", (char)48);
