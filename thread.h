@@ -1,18 +1,22 @@
 /* Student's code goes here (Cooperative Threads). */
 enum thread_status {
 	THREAD_RUNNING,
+	THREAD_READY,
+	THREAD_WAITING,
+	THREAD_TERMINATED
     /* Define the various possible status of a thread. */
 
 };
 
 struct thread {
-    int id;
-    void* sp;
-    enum thread_status status;
+    int id;                //Conatins thread ID
+    void* sp;                //Here we will store the stack pointer
+    enum thread_status status;        //STATUS of threads in its lifecycle
+    void (*entry)(void *arg);        //Save the address of a fuction that has void* argument
+    void *arg;                //Save the argument of the above function
+    TAILQ_ENTRY(thread) thread_ptr;    //Has pointer to next and prev
     /* Define the data structure for thread control block. */
-
 };
-
 struct cv {
     /* Define the data structure for conditional variables. */
 

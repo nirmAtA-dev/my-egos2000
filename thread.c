@@ -8,27 +8,64 @@
 #include <sys/queue.h>
 #include "print.c"
 #include "thread.h"
-
 /* Student's code goes here (Cooperative Threads). */
 /* Define the TCB and helper functions (if needed) for multi-threading. */
+//This creates a head structure to handle queue, no memory is allocated
 
+TAILQ_HEAD(thread_queue, thread);
+//declares the head structure
+struct thread_queue TCB;
 /* Student's code ends here. */
+
 
 void thread_init() {
     /* Student's code goes here (Cooperative Threads). */
-
+    //initialize it to empty state
+    TAILQ_INIT(&TCB);
+    //creating a main thread and inserting to the TAILQ
+    struct thread *main_thread = malloc(sizeof(struct thread));
+    main_thread->id = 0;
+    main_thread->sp = NULL;
+    main_thread->status = THREAD_RUNNING;
+    main_thread->entry = NULL;
+    main_thread->arg = NULL;
+    //we add element at the TAIL
+    TAILQ_INSERT_TAIL(&TCB, main_thread, thread_ptr);
     /* Student's code ends here. */
 }
 
 void ctx_entry() {
     /* Student's code goes here (Cooperative Threads). */
+    struct thread *child_thread = TAILQ_LAST(&TCB, thread_queue);
+    if((child_thread->id > 0) && (child_thread->status == THREAD_READY || child_thread->status == THREAD_WAITING)){
+        child_thread->status = THREAD_RUNNING;
+        child_thread->entry(child_thread->arg);
+        thread_exit();
+    }
 
+    thread_exit(); 
     /* Student's code ends here. */
 }
 
 void thread_create(void (*entry)(void *arg), void *arg) {
     /* Student's code goes here (Cooperative Threads). */
-
+    //first fetch the tail pointed struct 
+    struct thread *tail_thread = TAILQ_LAST(&TCB, thread_queue);
+    if(tail_thread == NULL){
+	    printf("First call thread_init() then thread_create");
+       	    _end();
+    }
+    //create a new child thread
+    struct thread *child_thread = malloc(sizeof(struct thread));
+    child_thread->id = tail_thread->id + 1;
+    child_thread->status = THREAD_READY;
+    tail_thread->status = THREAD_WAITING;
+    child_thread->entry = entry;
+    child_thread->arg = arg;
+    TAILQ_INSERT_TAIL(&TCB, child_thread, thread_ptr);
+    //we create a child stack
+    char* child_stack = malloc(STACK_SIZE);
+    ctx_start(&(tail_thread->sp), child_stack + STACK_SIZE);
     /* Student's code ends here. */
 }
 
@@ -40,7 +77,16 @@ void thread_yield() {
 
 void thread_exit() {
     /* Student's code goes here (Cooperative Threads). */
-
+    struct thread *current_thread = TAILQ_LAST(&TCB, thread_queue);
+    struct thread *prev_thread = TAILQ_PREV(current_thread, thread_queue, thread_ptr); 
+    if(current_thread->id == 0){
+        _end();
+    }
+    void* switch_sp = prev_thread->sp;
+    TAILQ_REMOVE(&TCB, current_thread, thread_ptr);
+    free(current_thread);
+    void *dummy_ptr;
+    ctx_switch(&dummy_ptr, switch_sp);
     /* Student's code ends here. */
 }
 
@@ -66,7 +112,7 @@ void cv_signal(struct cv *condition) {
 
     /* Student's code ends here. */
 }
-
+/*
 #define BUF_SIZE 3
 void* buffer[BUF_SIZE];
 int count = 0;
@@ -76,12 +122,12 @@ struct cv nonempty, nonfull;
 void produce(void* arg) {
     while (1) {
         while (count == BUF_SIZE) cv_wait(&nonfull);
-        /* At this point, the buffer is not full. */
+        // At this point, the buffer is not full. 
 
-        /* Student's code goes here (Cooperative Threads). */
-        /* Print out the producer ID with the arg pointer. */
+        // Student's code goes here (Cooperative Threads). 
+        // Print out the producer ID with the arg pointer. 
 
-        /* Student's code ends here. */
+        // Student's code ends here. 
         buffer[tail] = arg;
         tail = (tail + 1) % BUF_SIZE;
         count += 1;
@@ -92,12 +138,12 @@ void produce(void* arg) {
 void consume(void *arg) {
     while (1) {
         while (count == 0) cv_wait(&nonempty);
-        /* At this point, the buffer is not empty. */
+        // At this point, the buffer is not empty. 
 
-        /* Student's code goes here (Cooperative Threads). */
-        /* Print out the consumer ID with the arg pointer. */
+        // Student's code goes here (Cooperative Threads). 
+        // Print out the consumer ID with the arg pointer. 
 
-        /* Student's code ends here. */
+        // Student's code ends here.
         void* result = buffer[head];
         head = (head + 1) % BUF_SIZE;
         count -= 1;
@@ -105,7 +151,20 @@ void consume(void *arg) {
     }
 }
 
+*/
+void child(void* arg) {
+    printf("%s is running.\n\r", arg);
+}
+
+
 int main() {
+    // Basic thread functionality
+    thread_init();
+    thread_create(child, "Child thread");
+    printf("Main thread is running.\n\r");
+    thread_exit();
+
+    /*
     thread_init();
 
     int ID[500];
@@ -118,7 +177,7 @@ int main() {
         thread_create(produce, ID + i);
 
     printf("main thread exits\n\r");
-    thread_exit();
+    thread_exit();*/
 
     /* The control flow should NEVER get here. If the main thread is the last to
      * call thread_exit(), thread_exit() should terminate the program by calling

@@ -279,7 +279,7 @@ size_t format_to_str_len(const char *fmt, va_list args){
 	// I just want a simple code not exact , hence 20 bytes 
 	// extra are nothing in case of integer
 	unsigned int count = 0;
-	while(*fmt != '%'){
+	while(*fmt != '%' && *fmt != '\0'){
 		fmt++;
 		count++;
 	}
@@ -314,14 +314,14 @@ int printf(const char* format, ...) {
 }
 
 
-
+/*
 int main() {
     char* msg = "Hello, World!\n\r";
     terminal_write(msg, 15);
 
-    /* Uncomment this line of code
-     * when implementing formatted output
-     */
+    // Uncomment this line of code
+     // when implementing formatted output
+     //
     printf("%s-%d is awesome!\n\r", "egos", 2000);
     printf("%c is character $\n\r", '$');
     printf("%c is character 0\n\r", (char)48);
@@ -331,3 +331,4 @@ int main() {
     printf("%llu is the maximum of unsigned long long\n\r", 0xFFFFFFFFFFFFFFFFULL);
     return 0;
 }
+*/
