@@ -25,17 +25,27 @@ static void excp_entry(uint);
 
 void kernel_entry() {
     /* With the kernel lock, only one core can enter this point at any time. */
+    //here we user hartid to which core is the current kernel running
     asm("csrr %0, mhartid" : "=r"(core_in_kernel));
 
     /* Save the process context. */
+    // process set is a array structures where we save the mepc value when mret is called it jumps at 
+    // this location
     asm("csrr %0, mepc" : "=r"(proc_set[curr_proc_idx].mepc));
+    // we save all the kernel stack register at the current process structure register in 
+    // a process array structure. kernel stack register starts at EGOS_STACK_TOP
+    // hence we save from lower address of EGOS_STACK_TOP - 128 Bytes to EGOS_STACK_TOP 
     memcpy(curr_saved, (void*)(EGOS_STACK_TOP - 32 * 4), 32 * 4);
 
+    //mcause holds in its 31st bit the check if interrupt caused the trap, although divide by zero can be a 
+    //trap but not interrupt trap, we save the mcause in a local variable and check if its caused by
+    //interrupt or exception and call the function accordingly
     uint mcause;
     asm("csrr %0, mcause" : "=r"(mcause));
     (mcause & (1 << 31)) ? intr_entry(mcause & 0x3FF) : excp_entry(mcause);
 
     /* Restore the process context. */
+    //
     asm("csrw mepc, %0" ::"r"(proc_set[curr_proc_idx].mepc));
     memcpy((void*)(EGOS_STACK_TOP - 32 * 4), curr_saved, 32 * 4);
 }
@@ -60,7 +70,7 @@ static void excp_entry(uint id) {
         proc_yield();
         return;
     }
-    /* Student's code goes here (System Call & Protection | Virtual Memory). */
+/* Student's code goes here (System Call & Protection | Virtual Memory). */
 
     /* Kill the current process if curr_pid is a user application. */
 
