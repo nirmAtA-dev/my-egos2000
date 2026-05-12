@@ -10,12 +10,6 @@
 #include "thread.h"
 /* Student's code goes here (Cooperative Threads). */
 /* Define the TCB and helper functions (if needed) for multi-threading. */
-//This creates a head structure to handle queue, no memory is allocated
-
-TAILQ_HEAD(thread_queue, thread);
-//declares the head structure
-struct thread_queue TCB;
-/* Student's code ends here. */
 
 
 void thread_init() {
@@ -25,7 +19,6 @@ void thread_init() {
     //creating a main thread and inserting to the TAILQ
     struct thread *main_thread = malloc(sizeof(struct thread));
     main_thread->id = 0;
-    main_thread->sp = NULL;
     main_thread->status = THREAD_RUNNING;
     main_thread->entry = NULL;
     main_thread->arg = NULL;
@@ -71,6 +64,17 @@ void thread_create(void (*entry)(void *arg), void *arg) {
 
 void thread_yield() {
     /* Student's code goes here (Cooperative Threads). */
+    struct thread *current_thread = TAILQ_LAST(&TCB, thread_queue);
+    struct thread *prev_thread = TAILQ_PREV(current_thread, thread_queue, thread_ptr); 
+    if(current_thread->status == THREAD_RUNNING){
+	    current_thread->status = THREAD_WAITING;
+	    prev_thread->status = THREAD_RUNNING;
+	    ctx_switch(&(current_thread->sp) , prev_thread->sp);
+    }else{
+	    prev_thread->status = THREAD_WAITING;
+	    current_thread->status = THREAD_RUNNING;
+	    ctx_switch(&(prev_thread->sp) , current_thread->sp);
+    }    
 
     /* Student's code ends here. */
 }
@@ -152,16 +156,33 @@ void consume(void *arg) {
 }
 
 */
+/*
 void child(void* arg) {
     printf("%s is running.\n\r", arg);
+}
+*/
+void child(void* arg) {
+    for (int i = 0; i < 10; i++) {
+        printf("%s is in for loop i=%d\n\r", arg, i);
+        thread_yield();
+    }
 }
 
 
 int main() {
     // Basic thread functionality
+     /*
     thread_init();
     thread_create(child, "Child thread");
     printf("Main thread is running.\n\r");
+    thread_exit();
+    */
+    thread_init();
+    thread_create(child, "Child thread");
+    for (int i = 0; i < 10; i++) {
+        printf("Main thread is in for loop i=%d\n\r", i);
+        thread_yield();
+    }
     thread_exit();
 
     /*
