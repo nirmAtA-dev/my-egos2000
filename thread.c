@@ -16,6 +16,7 @@ void thread_init() {
     /* Student's code goes here (Cooperative Threads). */
     //initialize it to empty state
     TAILQ_INIT(&TCB);
+    cv_init(&condition);
     //creating a main thread and inserting to the TAILQ
     struct thread *main_thread = malloc(sizeof(struct thread));
     main_thread->id = 0;
@@ -101,26 +102,37 @@ void thread_exit() {
 
 void cv_init(struct cv *condition) {
     /* Student's code goes here (Cooperative Threads). */
-
+    TAILQ_INIT(&(condition->CONDQ));
     /* Student's code ends here. */
 }
 
 void cv_wait(struct cv *condition) {
     /* Student's code goes here (Cooperative Threads). */
-
+    struct thread *current_running_thread = TAILQ_LAST(&TCB, thread_queue);
+    if(current_running_thread != NULL){
+	    current_running_thread->status = THREAD_WAITING;
+	    TAILQ_REMOVE(&TCB, current_running_thread, thread_ptr);
+	    TAILQ_INSERT_TAIL(&(condition->CONDQ), current_running_thread, thread_ptr);
+    }
     /* Student's code ends here. */
 }
 
 void cv_signal(struct cv *condition) {
     /* Student's code goes here (Cooperative Threads). */
+    struct thread *thread_to_wake = TAILQ_LAST(&(condition->CONDQ),thread_queue);
+    if(thread_to_wake != NULL){
+	    thread_to_wake->status = THREAD_RUNNING;
+	    TAILQ_REMOVE(&(condition->CONDQ), thread_to_wake, thread_ptr);
+	    TAILQ_INSERT_TAIL(&TCB, thread_to_wake, thread_ptr);
+    }
 
     /* Student's code ends here. */
 }
-/*
+
 #define BUF_SIZE 3
 void* buffer[BUF_SIZE];
 int count = 0;
-int head = 0, tail = 0;
+int cvhead = 0, cvtail = 0;
 struct cv nonempty, nonfull;
 
 void produce(void* arg) {
@@ -132,8 +144,8 @@ void produce(void* arg) {
         // Print out the producer ID with the arg pointer. 
 
         // Student's code ends here. 
-        buffer[tail] = arg;
-        tail = (tail + 1) % BUF_SIZE;
+        buffer[cvtail] = arg;
+        cvtail = (cvtail + 1) % BUF_SIZE;
         count += 1;
         cv_signal(&nonempty);
     }
@@ -148,26 +160,27 @@ void consume(void *arg) {
         // Print out the consumer ID with the arg pointer. 
 
         // Student's code ends here.
-        void* result = buffer[head];
-        head = (head + 1) % BUF_SIZE;
+        void* result = buffer[cvhead];
+        cvhead = (cvhead + 1) % BUF_SIZE;
         count -= 1;
         cv_signal(&nonfull);
     }
 }
 
-*/
+
 /*
 void child(void* arg) {
     printf("%s is running.\n\r", arg);
 }
 */
+/*
 void child(void* arg) {
     for (int i = 0; i < 10; i++) {
         printf("%s is in for loop i=%d\n\r", arg, i);
         thread_yield();
     }
 }
-
+*/
 
 int main() {
     // Basic thread functionality
@@ -177,6 +190,7 @@ int main() {
     printf("Main thread is running.\n\r");
     thread_exit();
     */
+    /*
     thread_init();
     thread_create(child, "Child thread");
     for (int i = 0; i < 10; i++) {
@@ -184,8 +198,8 @@ int main() {
         thread_yield();
     }
     thread_exit();
+    */
 
-    /*
     thread_init();
 
     int ID[500];
@@ -198,7 +212,7 @@ int main() {
         thread_create(produce, ID + i);
 
     printf("main thread exits\n\r");
-    thread_exit();*/
+    thread_exit();
 
     /* The control flow should NEVER get here. If the main thread is the last to
      * call thread_exit(), thread_exit() should terminate the program by calling

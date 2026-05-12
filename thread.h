@@ -17,10 +17,19 @@ struct thread {
     TAILQ_ENTRY(thread) thread_ptr;    //Has pointer to next and prev
     /* Define the data structure for thread control block. */
 };
+//This creates a head structure to handle queue, no memory is allocated
+
+TAILQ_HEAD(thread_queue, thread);
+//declares the head structure
+struct thread_queue TCB;
+/* Student's code ends here. */
+
 struct cv {
     /* Define the data structure for conditional variables. */
+    struct thread_queue CONDQ;
 
 };
+struct cv condition;
 /* Student's code ends here. */
 
 /* Every thread created by thread_create() has a 1KB stack.
