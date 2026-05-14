@@ -31,7 +31,16 @@ int proc_alloc() {
             /* Student's code goes here (Preemptive Scheduler | System Call). */
 
             /* Initialization of lifecycle statistics, MLFQ or process sleep. */
-
+	    //Initialization of lifecycle statistics
+	    proc_set[i].proc_creation_time = 0;
+	    proc_set[i].proc_termination_time = 0;
+	    proc_set[i].proc_first_time_schedule_time = 0;
+	    proc_set[i].proc_resumed = 0;
+	    proc_set[i].proc_paused = 0;
+	    proc_set[i].cpu_time = 0;
+	    proc_set[i].time_intr_count = 0;
+	    //process first created 
+	    proc_set[i].proc_creation_time = (uint)(mtime_get() / 10000);
             /* Student's code ends here. */
             return curr_pid;
         }
@@ -42,7 +51,27 @@ int proc_alloc() {
 void proc_free(int pid) {
     /* Student's code goes here (Preemptive Scheduler). */
 
-    /* Print the lifecycle statistics of the terminated process or processes. */
+    for(uint i = 0; i < MAX_NPROCESS; i++){
+	    if(proc_set[i].pid == pid){
+		    /* Print the lifecycle statistics of the terminated process or processes. */
+		    INFO("For PID: %d", pid);
+		    proc_set[i].proc_termination_time = (uint)(mtime_get() / 10000);
+		    // Turn Around time 
+		    uint tat = proc_set[i].proc_termination_time - proc_set[i].proc_creation_time;
+    		    INFO("Turn Around Time: %d ms", tat);
+                    //response time
+                    uint rt = proc_set[i].proc_first_time_schedule_time - proc_set[i].proc_creation_time;
+                    INFO("Response Time: %d ms", rt);
+                    //cpu_time
+                    uint cpu_time = proc_set[i].cpu_time;
+                    INFO("CPU time: %d ms", cpu_time);
+                    //Number of timer interrupts 
+                    uint n = proc_set[i].time_intr_count;
+                    INFO("Number of timer interrput encountered: %d", n);
+	    }
+    }
+
+
     if (pid != GPID_ALL) {
         earth->mmu_free(pid);
         proc_set_status(pid, PROC_UNUSED);

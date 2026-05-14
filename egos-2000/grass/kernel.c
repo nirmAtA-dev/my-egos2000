@@ -82,11 +82,14 @@ static void intr_entry(uint id) {
     /* Student's code goes here (Preemptive Scheduler). */
 
     /* Update the process lifecycle statistics. */
+    
 
     /* Student's code ends here. */
 
-    if (id == INTR_ID_TIMER) return proc_yield();
-
+    if (id == INTR_ID_TIMER){
+	    proc_set[curr_proc_idx].time_intr_count++;
+	    return proc_yield();
+    }
     /* Student's code goes here (Ethernet & TCP/IP). */
 
     /* Handle an external interrupt from the Intel Gigabit Ethernet Controller.
@@ -99,13 +102,15 @@ static void intr_entry(uint id) {
 }
 
 static void proc_yield() {
-    if (curr_status == PROC_RUNNING) proc_set_runnable(curr_pid);
+    if (curr_status == PROC_RUNNING){ proc_set_runnable(curr_pid);}
 
     /* Student's code goes here (Multiple Projects). */
-
     /* [Preemptive Scheduler]
      * Measure and record lifecycle statistics for the *current* process.
-     * Modify the loop below to find the next process to schedule with MLFQ.
+     */
+    proc_set[curr_proc_idx].proc_paused = (uint)(mtime_get() / 10000);
+    proc_set[curr_proc_idx].cpu_time += proc_set[curr_proc_idx].proc_paused - proc_set[curr_proc_idx].proc_resumed;
+     /* Modify the loop below to find the next process to schedule with MLFQ.
      * [System Call & Protection]
      * Do not schedule a process that should still be sleeping at this time. */
 
@@ -123,7 +128,12 @@ static void proc_yield() {
     if (next_idx < MAX_NPROCESS) {
         /* [Preemptive Scheduler]
          * Measure and record lifecycle statistics for the *next* process.
-         * [System Call & Protection | Multicore & Locks]
+	*/
+	 if(proc_set[next_idx].proc_resumed == 0)
+		 proc_set[next_idx].proc_first_time_schedule_time = (uint)(mtime_get() / 10000);
+	 proc_set[next_idx].proc_resumed = (uint)(mtime_get() / 10000);
+   
+        /* [System Call & Protection | Multicore & Locks]
          * Modify mstatus.MPP to enter machine or user mode after mret. */
 
     } else {

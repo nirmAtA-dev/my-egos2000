@@ -18,13 +18,22 @@ struct process {
     enum proc_status status;
     uint mepc, saved_registers[32];
     /* Student's code goes here (Preemptive Scheduler | System Call). */
-
+    //lifecycle statistics
+    //for turn around time = proc_termination_time - proc_creation_time;
+    uint proc_creation_time; 
+    uint proc_termination_time;
+    //for response time = proc_first_time_schedule - proc_creation_time;
+    uint proc_first_time_schedule_time;
+    //for cpu time
+    uint proc_resumed;
+    uint proc_paused;
+    uint cpu_time;  
+    uint time_intr_count;
     /* Add new fields for lifecycle statistics, MLFQ or process sleep. */
 
     /* Student's code ends here. */
 };
 #define MAX_NPROCESS 16
-
 ulonglong mtime_get();
 
 int proc_alloc();
